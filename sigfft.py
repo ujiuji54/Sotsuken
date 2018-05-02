@@ -1,7 +1,6 @@
 import sys
 
 import numpy as np
-import scipy.fftpack as fft
 import matplotlib.pyplot as plt
 
 import soundfile as sf
@@ -14,13 +13,16 @@ if __name__ == '__main__':
     print(wav)
     totaltime = len(wav)/fs
     time = np.arange(0, totaltime, 1/fs)
+    plt.subplot(2,1,1)
     plt.plot(time,wav)
-    plt.show()
 
-"""
-    wav_l = wav[:, 0]
-    wav_r = wav[:, 1]
-    fig = plt.figure(1, figsize=(8, 10))
-    ax = fig.add_subplot(211)
-    ax.plot(
-"""
+    d=1.0/fs
+    size = 2048
+    s = 10000
+    fftwav=np.fft.fft(wav[s:s+size])
+    frq=np.fft.fftfreq(size,d)
+    plt.subplot(2,1,2)
+    plt.plot(frq,np.abs(fftwav))
+    plt.axis([0,10000,0,max(np.abs(fftwav))])
+
+    plt.show()
