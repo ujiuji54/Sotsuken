@@ -51,6 +51,14 @@ class Newral_Network(object):
         error = np.sum(label * np.log(self.Z[-1]), axis=1)
         return -np.mean(error)
 
+    def calc_grad(self, w, b, z, delta):#勾配の計算
+        w_grad = np.zeros_like(w)
+        b_grad = np.zeros_like(b)
+        N = float(z.shape[0])
+        w_grad = np.dot(z.T, delta) / N
+        b_grad = np.mean(delta, axis = 0)
+        return w_grad, b_grad
+
     # 誤差逆伝搬
     def backPropagate(self, _label, eta, M):
         # calculate output_delta and error terms
@@ -106,7 +114,7 @@ class Newral_Network(object):
                 self.forward(_inputs)
                 self.backPropagate(_label, eta, M)
 
-                loss = self.calc_loss(_label, eta, M)
+                loss = self.calc_loss(_label)
                 minibatch_errors.append(loss)
             En = sum(minibatch_errors) / len(minibatch_errors)
             print ("epoch", val + 1, " : Loss = ", En)
@@ -114,6 +122,27 @@ class Newral_Network(object):
         print("\n")
         errors = np.asarray(errors)
         plt.plot(errors)
+
+    def getWeight(self):#パラメータの値を取得
+        for i in range(len(self.W)):
+            print("W", i + 1, ":")
+            print(self.W[i])
+            print("\n")
+            print("B", i + 1, ":")
+            print(self.B[i])
+            print("\n")
+
+    def save_weight(self, name):
+        import datetime
+        today_detail = datetime.datetime.today()
+        s = today_detail.strftime("%m-%d-%H-%M")
+        np.save('Models/%s_W_%s.npy' % (name, s), self.W)
+        np.save('Models/%s_B_%s.npy' % (name, s), self.B)
+        print("Weight is saved!!")
+        for i in range(len(self.W)):
+            print("W", i + 1, ".shape = ", self.W[i].shape)
+            print("B", i + 1, ".shape = ", self.B[i].shape)
+        print("\n")
 
     def draw_test(self, x, label, W, B):
         self.W = W
@@ -126,6 +155,7 @@ class Newral_Network(object):
         Z = self.forward(np.c_[xx.ravel(),yy.ravel()])
         Z = Z.reshape(xx.shape)
 
+        plt.subplot(2, 1 ,2)
         plt.contourf(xx, yy, Z, cmap=plt.cm.jet)
         plt.scatter(x[:, 0], x[:, 1], c=label, cmap=plt.cm.jet)
         plt.show()
@@ -136,11 +166,22 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     #データ生成
     x, label = sklearn.datasets.make_classification(n_features=2, n_samples=300, n_redundant=0, n_informative=2, n_clusters_per_class=1, n_classes=3)
+    print(x,label)
 
     #グラフの描画
-    #plt.scatter(x[:,0], x[:, 1], c=label, cmap=plt.cm.jet)
+    plt.subplot(2, 1, 1)
+    plt.scatter(x[:,0], x[:, 1], c=label, cmap=plt.cm.jet)
     #plt.show()
 
     unit = [2,3,3]
+    minibatch = 20
+    iterations = 3000
+    eta = 0.1
+    M = 0.1
+    N = x.shape[0]
+    dataset = np.column_stack((x, label))
+    np.random.shuffle(dataset)
+
     brain = Newral_Network(unit)
-    brain.train(
+    brain.train(dataset, N, iteration, minibatch, eta, M)
+    brain.draw_test(x, label, brain.W, brain.B)
