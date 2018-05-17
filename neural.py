@@ -59,8 +59,7 @@ class Newral_Network(object):
         b_grad = np.mean(delta, axis = 0)
         return w_grad, b_grad
 
-    # 誤差逆伝搬
-    def backPropagate(self, _label, eta, M):
+    def backPropagate(self, _label, eta, M):# 誤差逆伝搬
         # calculate output_delta and error terms
         W_grad = []
         B_grad = []
@@ -121,6 +120,7 @@ class Newral_Network(object):
             errors.append(En)
         print("\n")
         errors = np.asarray(errors)
+        plt.subplot(2, 1, 1)
         plt.plot(errors)
 
     def getWeight(self):#パラメータの値を取得
@@ -165,12 +165,12 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     #データ生成
-    x, label = sklearn.datasets.make_classification(n_features=2, n_samples=300, n_redundant=0, n_informative=2, n_clusters_per_class=1, n_classes=3)
-    print(x,label)
+    x, label_bush = sklearn.datasets.make_classification(n_features=2, n_samples=300, n_redundant=0, n_informative=2, n_clusters_per_class=1, n_classes=3)
+    print(x,label_bush)
 
     #グラフの描画
-    plt.subplot(2, 1, 1)
-    plt.scatter(x[:,0], x[:, 1], c=label, cmap=plt.cm.jet)
+    #plt.subplot(2, 1, 1)
+    #plt.scatter(x[:,0], x[:, 1], c=label, cmap=plt.cm.jet)
     #plt.show()
 
     unit = [2,3,3]
@@ -179,9 +179,13 @@ if __name__ == "__main__":
     eta = 0.1
     M = 0.1
     N = x.shape[0]
+    label = np.zeros((N, unit[-1]))
+    for i in range(N):
+            label[i, label_bush[i]] = 1
+
     dataset = np.column_stack((x, label))
     np.random.shuffle(dataset)
 
     brain = Newral_Network(unit)
-    brain.train(dataset, N, iteration, minibatch, eta, M)
+    brain.train(dataset, N, iterations, minibatch, eta, M)
     brain.draw_test(x, label, brain.W, brain.B)
