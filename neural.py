@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
     unit = [2,3,3]
     minibatch = 20
-    iterations = 3000
+    iterations = 1000
     eta = 0.1
     M = 0.1
     N = x.shape[0]
