@@ -1,5 +1,5 @@
 from create import *
 from play import *
 
-create_wave(1,100,44100,100)
+create_wave(100,48000)
 #play()
