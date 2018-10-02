@@ -1,23 +1,35 @@
+from argparse import ArgumentParser
 import wave
 import numpy as np
 import matplotlib.pyplot as plt
 import struct
 import pyaudio
-from scipy import fromstring, int16
 
 def cut_wave():
-    iw = wave.open("outputwave.wav","r")
-    data = iw.readframes(iw.getnframes())
-    data = fromstring(data, dtype=int16)
+    args = parse_args()
+    print("output_filename:")
+    output_filename = input()
+
+    iw = wave.open(args.input_file,"r")
+    print(iw.getnchannels())
+    data = np.frombuffer(iw.readframes(iw.getnframes()),dtype=np.int16)
     print(data)
     print(len(data))
 
     for i in range(10):
-        binwave = data[i*607200:(i+1)*607200]
-        binwave = struct.pack("h" * len(binwave), * binwave)
-        ow = wave.Wave_write("train_y"+str(i)+".wav")
-        p = (1, 2, 48000, len(binwave), 'NONE', 'not compressed')
-        ow.setparams(p)
+        binwave = data[i*240000:(i+1)*240000]
+        ow = wave.Wave_write(output_filename+str(i)+".wav")
+        ow.setparams((1, 2, 48000, len(binwave), 'NONE', 'not compressed'))
         ow.writeframes(binwave)
         ow.close()
     iw.close()
+
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--input_file", "-i",
+        help="input file (*.wav)")
+    return parser.parse_args()
+
+if __name__=="__main__":
+    cut_wave()
