@@ -14,10 +14,10 @@ def load_wave(wave_file):
         buf = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16)
     return (buf / 0x7fff).astype(np.float32)
 
-def save_wave(buf, wave_file):
+def save_wave(buf, wave_file, sampling_rate):
     _buf = (buf * 0x7fff).astype(np.int16)
     with wave.open(wave_file, "w") as w:
-        w.setparams((1, 2, 48000, len(_buf), "NONE", "not compressed"))
+        w.setparams((1, 2, sampling_rate, len(_buf), "NONE", "not compressed"))
         w.writeframes(_buf)
 
 def flow(dataset, timesteps, batch_size):

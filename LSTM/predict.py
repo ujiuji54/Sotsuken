@@ -13,6 +13,7 @@ def main():
     with open(args.config_file) as fp:
         config = yaml.safe_load(fp)
 
+    sampling_rate = config["sampling_rate"]
     input_timesteps = config["input_timesteps"]
     output_timesteps = config["output_timesteps"]
     batch_size = config["batch_size"]
@@ -36,7 +37,7 @@ def main():
     
     y = model.predict(x, batch_size=batch_size)
     y = y[:, -output_timesteps:, :].reshape(-1)[:len(data)]
-    save_wave(y, args.output_file)
+    save_wave(y, args.output_file, sampling_rate)
 
 
 def parse_args():

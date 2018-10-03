@@ -1,4 +1,5 @@
 ---
+sampling_rate: 48000
 input_timesteps: 5280
 output_timesteps: 480
 batch_size: 16
