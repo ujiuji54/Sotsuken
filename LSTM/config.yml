@@ -1,7 +1,7 @@
 ---
 sampling_rate: 48000
-input_timesteps: 5280
-output_timesteps: 480
+input_time: 110 #ms 
+output_time: 10 #ms
 batch_size: 16
 max_epochs: 100
 patience: 50

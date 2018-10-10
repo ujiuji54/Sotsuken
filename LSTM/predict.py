@@ -14,8 +14,8 @@ def main():
         config = yaml.safe_load(fp)
 
     sampling_rate = config["sampling_rate"]
-    input_timesteps = config["input_timesteps"]
-    output_timesteps = config["output_timesteps"]
+    input_timesteps = int(sampling_rate*config["input_time"]/1000)
+    output_timesteps = int(sampling_rate*config["input_time"]/1000)
     batch_size = config["batch_size"]
 
     data = load_wave(args.input_file)
@@ -47,10 +47,10 @@ def parse_args():
         help="configuration file (*.yml)")
     parser.add_argument(
         "--input_file", "-i",
-        help="input wave file (48kHz/mono, *.wav)")
+        help="input wave file ("+ str(config["sampling_rate"]) +"Hz/mono, *.wav)")
     parser.add_argument(
         "--output_file", "-o", default="./predicted.wav",
-        help="output wave file (48kHz/mono, *.wav)")
+        help="output wave file ("+ str(config["sampling_rate"]) +"Hz/mono, *.wav)")
     parser.add_argument(
         "--model_file", "-m",
         help="input model file (*.h5)")

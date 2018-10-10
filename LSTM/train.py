@@ -11,8 +11,8 @@ def main():
     with open(args.config_file) as fp:
         config = yaml.safe_load(fp)
     
-    input_timesteps = config["input_timesteps"]
-    output_timesteps = config["output_timesteps"]
+    input_timesteps = int(config["sampling_rate"]*config["input_time"]/1000)
+    output_timesteps = int(config["sampling_rate"]*config["input_time"]/1000)
     batch_size = config["batch_size"]
     max_epochs = config["max_epochs"]
     patience = config["patience"]
