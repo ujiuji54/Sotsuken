@@ -1,7 +1,8 @@
 from argparse import ArgumentParser
 import yaml
+import numpy as np
 from fx_replicator import (
-    load_wave, flow, build_model, LossFunc, train
+    load_wave, load_aux, flow, build_model, LossFunc, train
 )
 
 def main():
@@ -18,12 +19,13 @@ def main():
     patience = config["patience"]
 
     train_dataset = [
-        (load_wave(_[0]).reshape(-1, 1), load_wave(_[1]).reshape(-1, 1))
+        (load_wave(_[0]).reshape(-1, 1), load_wave(_[1]).reshape(-1, 1), load_aux(_[2]))
         for _ in config["train_data"]]
     train_dataflow = flow(train_dataset, input_timesteps, batch_size)
+    print(train_dataset[0])
 
     val_dataset = [
-        (load_wave(_[0]).reshape(-1, 1), load_wave(_[1]).reshape(-1, 1))
+        (load_wave(_[0]).reshape(-1, 1), load_wave(_[1]).reshape(-1, 1), load_aux(_[2]))
         for _ in config["val_data"]]
     val_dataflow = flow(val_dataset, input_timesteps, batch_size)
    

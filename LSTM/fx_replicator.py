@@ -5,13 +5,17 @@ import yaml
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from keras.models import Model
-from keras.layers import Input, CuDNNLSTM, BatchNormalization
+from keras.layers import Input, Dense, Activation, CuDNNLSTM, BatchNormalization, Multiply
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from keras.losses import mean_squared_error
 
 def load_wave(wave_file):
     with wave.open(wave_file, "r") as w:
         buf = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16)
+    return (buf / 0x7fff).astype(np.float32)
+
+def load_aux(aux):
+    buf = np.array([aux])
     return (buf / 0x7fff).astype(np.float32)
 
 def save_wave(buf, wave_file, sampling_rate):
@@ -24,38 +28,28 @@ def flow(dataset, timesteps, batch_size):
     n_data = len(dataset)
     while True:
         i = np.random.randint(n_data)
-        x, y = dataset[i]
-        yield random_clop(x, y, timesteps, batch_size)
+        x = dataset[i][0]
+        y = dataset[i][1]
+        aux = dataset[i][2]
+        yield random_clop(x, aux, y, timesteps, batch_size)
 
-def random_clop(x, y, timesteps, batch_size):
+def random_clop(x, aux, y, timesteps, batch_size):
     max_offset = len(x) - timesteps
     offsets = np.random.randint(max_offset, size=batch_size)
     batch_x = np.stack((x[offset:offset+timesteps] for offset in offsets))
     batch_y = np.stack((y[offset:offset+timesteps] for offset in offsets))
-    return batch_x, batch_y
+    return [batch_x, aux], batch_y 
 
 def build_model(timesteps):
     main_input = Input((timesteps, 1))
-    output = build_node(
-        main_input,
-        CuDNNLSTM(64, return_sequences=True),
-        CuDNNLSTM(64, return_sequences=True),
-    )
-    model = Model(main_input, output)
+    aux_input = Input((1,1))
+    x = CuDNNLSTM(64, return_sequences=True)(main_input)
+    y = Dense(64, activation="sigmoid")(aux_input)
+    x = Multiply()([x,y])
+    x = CuDNNLSTM(64, return_sequences=True)(x)
+    output = CuDNNLSTM(1, return_sequences=True)(x)
+    model = Model([main_input, aux_input], output)
     return model
-
-def build_node(input, *nodes):
-    x = input
-    for node in nodes:
-        if callable(node):
-            x = node(x)
-        elif isinstance(node, list):
-            x = [build_node(x, branch) for branch in node]
-        elif isinstance(node, tuple):
-            x = build_node(x, *node)
-        else:
-            x = node
-    return x
 
 class LossFunc:
 
