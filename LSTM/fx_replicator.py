@@ -4,8 +4,8 @@ import wave
 import yaml
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
-from keras.models import Sequential
-from keras.layers import CuDNNLSTM, BatchNormalization
+from keras.models import Model
+from keras.layers import Input, CuDNNLSTM, BatchNormalization
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from keras.losses import mean_squared_error
 
@@ -35,11 +35,27 @@ def random_clop(x, y, timesteps, batch_size):
     return batch_x, batch_y
 
 def build_model(timesteps):
-    model = Sequential()
-    model.add(CuDNNLSTM(64, input_shape=(timesteps, 1), return_sequences=True, name="lstm_1"))
-    model.add(CuDNNLSTM(64, return_sequences=True, name="lstm_2"))
-    model.add(CuDNNLSTM(1, return_sequences=True, name="lstm_out"))
+    main_input = Input((timesteps, 1))
+    output = build_node(
+        main_input,
+        CuDNNLSTM(64, return_sequences=True),
+        CuDNNLSTM(64, return_sequences=True),
+    )
+    model = Model(main_input, output)
     return model
+
+def build_node(input, *nodes):
+    x = input
+    for node in nodes:
+        if callable(node):
+            x = node(x)
+        elif isinstance(node, list):
+            x = [build_node(x, branch) for branch in node]
+        elif isinstance(node, tuple):
+            x = build_node(x, *node)
+        else:
+            x = node
+    return x
 
 class LossFunc:
 
