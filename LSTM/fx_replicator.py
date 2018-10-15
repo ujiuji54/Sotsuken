@@ -38,11 +38,12 @@ def random_clop(x, aux, y, timesteps, batch_size):
     offsets = np.random.randint(max_offset, size=batch_size)
     batch_x = np.stack((x[offset:offset+timesteps] for offset in offsets))
     batch_y = np.stack((y[offset:offset+timesteps] for offset in offsets))
-    return [batch_x, aux], batch_y 
+    batch_aux = np.stack((aux[0] for offset in offsets))
+    return [batch_x, batch_aux], batch_y 
 
 def build_model(timesteps):
     main_input = Input((timesteps, 1))
-    aux_input = Input((1,1))
+    aux_input = Input((1, ))
     x = CuDNNLSTM(64, return_sequences=True)(main_input)
     y = Dense(64, activation="sigmoid")(aux_input)
     x = Multiply()([x,y])
