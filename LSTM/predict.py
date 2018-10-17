@@ -48,10 +48,10 @@ def parse_args():
         help="configuration file (*.yml)")
     parser.add_argument(
         "--input_file", "-i",
-        help="input wave file ("+ str(config["sampling_rate"]) +"Hz/mono, *.wav)")
+        help="input wave file (mono, *.wav)")
     parser.add_argument(
         "--output_file", "-o", default="./predicted.wav",
-        help="output wave file ("+ str(config["sampling_rate"]) +"Hz/mono, *.wav)")
+        help="output wave file (mono, *.wav)")
     parser.add_argument(
         "--model_file", "-m",
         help="input model file (*.h5)")
