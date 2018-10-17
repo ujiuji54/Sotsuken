@@ -3,7 +3,7 @@ import yaml
 import numpy as np
 from keras.models import load_model
 from fx_replicator import (
-    build_model, load_wave, save_wave, sliding_window, LossFunc
+    build_model, load_wave, load_aux, save_wave, sliding_window, LossFunc
 )
 
 def main():
@@ -19,6 +19,7 @@ def main():
     batch_size = config["batch_size"]
 
     data = load_wave(args.input_file)
+    aux = load_aux(5)
 
     # padding and rounded up to the batch multiple
     block_size = output_timesteps * batch_size
@@ -35,7 +36,7 @@ def main():
         args.model_file,
         custom_objects={"LossFunc": LossFunc(output_timesteps)})
     
-    y = model.predict(x, batch_size=batch_size)
+    y = model.predict([x, aux], batch_size=batch_size)
     y = y[:, -output_timesteps:, :].reshape(-1)[:len(data)]
     save_wave(y, args.output_file, sampling_rate)
 
