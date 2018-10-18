@@ -31,6 +31,7 @@ def main():
         np.zeros(postpad, np.float32)))
     x = sliding_window(padded, input_timesteps, output_timesteps)
     x = x[:, :, np.newaxis]
+    aux = [aux for _ in x]
 
     model = load_model(
         args.model_file,
