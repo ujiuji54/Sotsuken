@@ -5,9 +5,10 @@ import yaml
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from keras.models import Model
-from keras.layers import Input, Dense, Activation, CuDNNLSTM, BatchNormalization, Multiply
+from keras.layers import Input, Dense, Activation, CuDNNLSTM, Multiply
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from keras.losses import mean_squared_error
+from keras.utils import plot_model
 
 def load_wave(wave_file):
     with wave.open(wave_file, "r") as w:
@@ -45,11 +46,13 @@ def build_model(timesteps):
     main_input = Input((timesteps, 1))
     aux_input = Input((1, 1))
     x = CuDNNLSTM(64, return_sequences=True)(main_input)
-    y = Dense(64, activation="sigmoid")(aux_input)
-    x = Multiply()([x,y])
     x = CuDNNLSTM(64, return_sequences=True)(x)
-    output = CuDNNLSTM(1, return_sequences=True)(x)
+    x = CuDNNLSTM(1, return_sequences=True)(x)
+    y = Dense(1, activation="sigmoid")(aux_input)
+    output = Multiply()([x,y])
     model = Model([main_input, aux_input], output)
+    plot_model(model, to_file="model.png")
+    
     return model
 
 class LossFunc:
