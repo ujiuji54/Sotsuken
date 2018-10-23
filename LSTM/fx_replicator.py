@@ -16,7 +16,7 @@ def load_wave(wave_file):
     return (buf / 0x7fff).astype(np.float32)
 
 def load_aux(aux):
-    buf = np.array([[aux]])
+    buf = np.array([aux])
     return (buf / 0x7fff).astype(np.float32)
 
 def save_wave(buf, wave_file, sampling_rate):
@@ -44,14 +44,14 @@ def random_clop(x, aux, y, timesteps, batch_size):
 
 def build_model(timesteps):
     main_input = Input((timesteps, 1))
-    aux_input = Input((1, 1))
+    aux_input = Input((1,))
     x = CuDNNLSTM(64, return_sequences=True)(main_input)
     x = CuDNNLSTM(64, return_sequences=True)(x)
     x = CuDNNLSTM(1, return_sequences=True)(x)
     y = Dense(1, activation="sigmoid")(aux_input)
     output = Multiply()([x,y])
     model = Model([main_input, aux_input], output)
-    plot_model(model, to_file="model.png")
+    #plot_model(model, to_file="model.png", show_shapes="True")
     
     return model
 
