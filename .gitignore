@@ -1,0 +1,6 @@
+*.pyc
+*.au
+*.wav
+*.png
+LSTM/checkpoint
+LSTM/tensorboard
