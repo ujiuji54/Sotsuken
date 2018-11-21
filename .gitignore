@@ -1,0 +1,8 @@
+LSTM/checkpoint/
+LSTM/tensorboard/
+LSTM/data/
+*.pyc
+*.wav
+*.WAV
+*.au
+*.aup
