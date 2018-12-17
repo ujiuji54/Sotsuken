@@ -15,7 +15,7 @@ def main():
 
     sampling_rate = config["sampling_rate"]
     input_timesteps = int(sampling_rate*config["input_time"]/1000)
-    output_timesteps = int(sampling_rate*config["input_time"]/1000)
+    output_timesteps = int(sampling_rate*config["output_time"]/1000)
     batch_size = config["batch_size"]
 
     data = load_wave(args.input_file)
@@ -34,7 +34,7 @@ def main():
     model = load_model(
         args.model_file,
         custom_objects={"LossFunc": LossFunc(output_timesteps)})
-    
+
     y = model.predict(x, batch_size=batch_size)
     y = y[:, -output_timesteps:, :].reshape(-1)[:len(data)]
     save_wave(y, args.output_file, sampling_rate)
@@ -47,10 +47,10 @@ def parse_args():
         help="configuration file (*.yml)")
     parser.add_argument(
         "--input_file", "-i",
-        help="input wave file ("+ str(config["sampling_rate"]) +"Hz/mono, *.wav)")
+        help="input wave file *.wav)")
     parser.add_argument(
         "--output_file", "-o", default="./predicted.wav",
-        help="output wave file ("+ str(config["sampling_rate"]) +"Hz/mono, *.wav)")
+        help="output wave file *.wav)")
     parser.add_argument(
         "--model_file", "-m",
         help="input model file (*.h5)")
