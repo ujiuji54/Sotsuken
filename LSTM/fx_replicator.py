@@ -5,7 +5,7 @@ import yaml
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from keras.models import Model
-from keras.layers import Input, Dense, Activation, CuDNNLSTM, Multiply
+from keras.layers import Input, Dense, Activation, Reshape, CuDNNLSTM, Concatenate
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from keras.losses import mean_squared_error
 from keras.utils import plot_model
@@ -40,19 +40,22 @@ def random_clop(x, aux, y, timesteps, batch_size):
     batch_x = np.stack((x[offset:offset+timesteps] for offset in offsets))
     batch_y = np.stack((y[offset:offset+timesteps] for offset in offsets))
     batch_aux = np.stack((aux for offset in offsets))
-    return [batch_x, batch_aux], batch_y 
+    return [batch_x, batch_aux], batch_y
 
 def build_model(timesteps):
     main_input = Input((timesteps, 1))
     aux_input = Input((1,))
-    x = CuDNNLSTM(64, return_sequences=True)(main_input)
+    x = Reshape((1, -1))(main_input)
+    y = Reshape((1, -1))(aux_input)
+    x = Concatenate()([x, y])
+    x = Dense(timesteps, activation="relu")(x)
+    x = Reshape((-1,1))(x)
     x = CuDNNLSTM(64, return_sequences=True)(x)
-    x = CuDNNLSTM(1, return_sequences=True)(x)
-    y = Dense(1, activation="sigmoid")(aux_input)
-    output = Multiply()([x,y])
+    x = CuDNNLSTM(64, return_sequences=True)(x)
+    output = CuDNNLSTM(1, return_sequences=True)(x)
     model = Model([main_input, aux_input], output)
     #plot_model(model, to_file="model.png", show_shapes="True")
-    
+
     return model
 
 class LossFunc:
@@ -60,7 +63,7 @@ class LossFunc:
     def __init__(self, timesteps):
         self.__name__ = "LossFunc"
         self.timesteps = timesteps
-    
+
     def __call__(self, y_true, y_pred):
         return mean_squared_error(
             y_true[:, -self.timesteps:, :],
