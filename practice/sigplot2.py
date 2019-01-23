@@ -11,10 +11,18 @@ if __name__ == '__main__':
 
     filename = sys.argv[1]
     wav, fs = sf.read(filename)
-    print(wav)
     totaltime = len(wav)/fs
     time = np.arange(0, totaltime, 1/fs)
-    plt.plot(time,wav)
+    plt.plot(time,wav, label="Real")
+
+    filename = sys.argv[2]
+    wav, fs = sf.read(filename)
+    totaltime = len(wav)/fs
+    time = np.arange(0, totaltime, 1/fs)
+    plt.plot(time,wav, label="NN")
+
     plt.xlabel("Times [s]")
     plt.ylabel("Amplitude [arb. unit]")
+    plt.legend()
+    plt.xlim([0,0.02])
     plt.show()
