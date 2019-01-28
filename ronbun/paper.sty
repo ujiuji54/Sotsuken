@@ -1,0 +1,103 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% 電子工学科卒論スタイルファイル
+%   平成16年1月21日作成
+%   平成17年12月12日一部改正 
+%    by Y.Hashimoto
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%%%%  Set Size   %%%%
+\setlength\paperheight {297mm}
+\setlength\paperwidth  {210mm}
+\setlength\oddsidemargin{0mm}
+\setlength\evensidemargin{0mm}
+\setlength\textwidth{165mm}
+\setlength\topmargin{-17mm}
+\setlength\headheight{5mm}
+\setlength\headsep{7mm}
+\setlength\textheight{257mm}
+\setlength\baselineskip {18pt}
+%
+%%%% Title Page %%%%
+\def\title#1{\gdef\@title{#1}}%
+\def\author#1{\gdef\@author{#1}}%
+\def\adviser#1{\gdef\@adviser{#1}}%
+\def\year#1{\gdef\@year{#1}}%
+\def\abstract#1{\gdef\@abstract{#1}}%
+%
+\def\maketitle{%
+	\thispagestyle{empty}%
+	\setcounter{page}{1}%
+	\vspace*{3cm}%
+	\begin{center}%
+		{\Huge{平 成 }}%
+		{\Huge\@year}%
+		{\Huge{ 年 度}}%
+	\end{center}
+	\vskip 1cm
+	\begin{center}%
+		{\Huge{卒 業 研 究 報 告 書}}%
+	\end{center}
+	\vskip 2cm
+	\begin{center}%
+		\Huge\bfseries\@title
+	\end{center}
+	\vfill
+	\begin{center}%
+		{\Huge
+		\begin{tabular}[t]{ll}%
+        		指導教官 & \@adviser \\
+        		報告者 & \@author \\
+		\end{tabular}}%
+	\end{center}
+	\vskip 2cm
+	\begin{center}%
+		{\Huge{神戸市立工業高等専門学校}}%
+	\end{center}
+	\begin{center}%
+		{\Huge{電子工学科}}%
+	\end{center}
+	\vspace*{1cm}
+	\newpage
+%
+%%%% abstract %%%%
+	\setcounter{page}{1}%
+	\begin{center}
+	{\LARGE\bfseries{（論文要旨）}}
+	\end{center}
+	\vskip\baselineskip
+	\@abstract
+	\newpage
+}
+%
+%%% Caption %%%%%
+\long\def\@makecaption#1#2{%
+  \advance\leftskip1cm
+  \advance\rightskip1cm
+  \vskip\abovecaptionskip
+  \iftdir\sbox\@tempboxa{#1\hskip1zw#2}%
+    \else\sbox\@tempboxa{#1 #2}%
+  \fi
+  \ifdim \wd\@tempboxa >\hsize
+    \iftdir #1\hskip1zw#2\relax\par
+      \else #1 #2\relax\par\fi
+  \else
+    \global \@minipagefalse
+    \hbox to\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+  \vskip\belowcaptionskip}
+%
+%%% \Hline, \Vline %%%
+\makeatletter
+\def\@arrayrule{\@addtopreamble{%
+\vrule \@width \arrayrulewidth}}
+\def\Hline{\noalign{\hrule height 1.2pt}}
+\def\Vline{\vrule width 1.2pt}
+\def\nline{\noalign{\hrule height 0.2pt}}
+\makeatother
+
+%%% enumerate %%%
+\def\labelenumi{\arabic{enumi})}%
+%
+%%% other %%%
+\renewcommand{\arraystretch}{0.9}%
+\renewcommand{\bibname}{参考文献}%
