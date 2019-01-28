@@ -44,13 +44,23 @@
 
 \chapter{実験方法}
 \section{教師データ作成}
+本実験ではギター用の歪みエフェクタの一種である，BOSS DS-1を使用した．
+\begin{figure}[htbp]
+ \begin{center}
+  \includegraphics[width=120mm]{env.png}
+ \end{center}
+ \caption{録音環境}
+ \label{fig:one}
+\end{figure}
 
-\section{モデル構築}
+\section{学習}
 
 \section{評価実験}
 \subsection{出力波形比較}
+学習に使用していないギター音声データを，DS-1，学習モデルに入力し，DS-1から出力された音声データの波形と，モデルから出力された波形を比較した．
 
 \subsection{周波数スペクトル比較}
+の実験で出力された波形にフーリエ変換処理を行い，DS-1から出力された音声データの波形と，モデルから出力された波形の周波数スペクトルを比較した．
 
 \chapter{結果}
 本章では、第章の実験によって得られた結果について述べる。
@@ -58,46 +68,11 @@
 \section{学習}
 用意した教師データ、モデルを使用し、100Epochsの計算を行った。
 \begin{figure}[htbp]
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain1_loss.png}
-  \end{center}
-  \caption{gain目盛り1 教師データ損失}
-  \label{fig:one}
- \end{minipage}
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain1_val_loss.png}
-  \end{center}
-  \caption{gain目盛り1 テストデータ損失}
-  \label{fig:two}
- \end{minipage}
-\end{figure}
-
-\begin{figure}[htbp]
  \begin{center}
   \includegraphics[width=150mm]{gain1_loss_hikaku.png}
  \end{center}
  \caption{gain目盛り1 教師データ、テストデータの損失比較}
  \label{fig:one}
-\end{figure}
-
-\newpage
-\begin{figure}[htbp]
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain5_loss.png}
-  \end{center}
-  \caption{gain目盛り5 教師データ損失}
-  \label{fig:one}
- \end{minipage}
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain5_val_loss.png}
-  \end{center}
-  \caption{gain目盛り5 テストデータ損失}
-  \label{fig:two}
- \end{minipage}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -108,24 +83,6 @@
  \label{fig:one}
 \end{figure}
 
-\newpage
-\begin{figure}[htbp]
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain10_loss.png}
-  \end{center}
-  \caption{gain目盛り10 教師データ損失}
-  \label{fig:one}
- \end{minipage}
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain10_val_loss.png}
-  \end{center}
-  \caption{gain目盛り10 テストデータ損失}
-  \label{fig:two}
- \end{minipage}
-\end{figure}
-
 \begin{figure}[htbp]
  \begin{center}
   \includegraphics[width=150mm]{gain10_loss_hikaku.png}
@@ -134,26 +91,9 @@
  \label{fig:one}
 \end{figure}
 
-\newpage
+\clearpage
 \section{出力波形}
 に示す結果から、最もvalidationlossが低くなったEpochsのモデルを使用し、推論を行った。。
-
-\begin{figure}[htbp]
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain1_output.png}
-  \end{center}
-  \caption{gain目盛り1 教師データ波形}
-  \label{fig:one}
- \end{minipage}
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain1_predict_output.png}
-  \end{center}
-  \caption{gain目盛り1 回帰モデル出力波形}
-  \label{fig:two}
- \end{minipage}
-\end{figure}
 
 \begin{figure}[htbp]
  \begin{center}
@@ -161,24 +101,6 @@
  \end{center}
  \caption{gain目盛り1 波形拡大比較}
  \label{fig:one}
-\end{figure}
-
-\newpage
-\begin{figure}[htbp]
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain5_output.png}
-  \end{center}
-  \caption{gain目盛り5 教師データ波形}
-  \label{fig:one}
- \end{minipage}
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain5_predict_output.png}
-  \end{center}
-  \caption{gain目盛り5 回帰モデル出力波形}
-  \label{fig:two}
- \end{minipage}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -189,24 +111,6 @@
  \label{fig:one}
 \end{figure}
 
-\newpage
-\begin{figure}[htbp]
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain10_output.png}
-  \end{center}
-  \caption{gain目盛り10 教師データ波形}
-  \label{fig:one}
- \end{minipage}
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain10_predict_output.png}
-  \end{center}
-  \caption{gain目盛り10 回帰モデル出力波形}
-  \label{fig:two}
- \end{minipage}
-\end{figure}
-
 \begin{figure}[htbp]
  \begin{center}
   \includegraphics[width=150mm]{gain10_output_hikaku.png}
@@ -215,25 +119,8 @@
  \label{fig:one}
 \end{figure}
 
-\newpage
+\clearpage
 \section{スペクトル分析}
-
-\begin{figure}[htbp]
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain1_fft.png}
-  \end{center}
-  \caption{gain目盛り1 教師データ周波数スペクトル}
-  \label{fig:one}
- \end{minipage}
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain1_predict_fft.png}
-  \end{center}
-  \caption{gain目盛り1 回帰モデル出力波形周波数スペクトル}
-  \label{fig:two}
- \end{minipage}
-\end{figure}
 
 \begin{figure}[htbp]
  \begin{center}
@@ -241,24 +128,6 @@
  \end{center}
  \caption{gain目盛り1 教師データ、回帰モデル出力波形周波数スペクトル比較}
  \label{fig:one}
-\end{figure}
-
-\newpage
-\begin{figure}[htbp]
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain5_fft.png}
-  \end{center}
-  \caption{gain目盛り5 教師データ周波数スペクトル}
-  \label{fig:one}
- \end{minipage}
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain5_predict_fft.png}
-  \end{center}
-  \caption{gain目盛り5 回帰モデル出力波形周波数スペクトル}
-  \label{fig:two}
- \end{minipage}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -269,24 +138,6 @@
  \label{fig:one}
 \end{figure}
 
-\newpage
-\begin{figure}[htbp]
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain10_fft.png}
-  \end{center}
-  \caption{gain目盛り10 教師データ周波数スペクトル}
-  \label{fig:one}
- \end{minipage}
- \begin{minipage}{0.5\hsize}
-  \begin{center}
-   \includegraphics[width=85mm]{gain10_predict_fft.png}
-  \end{center}
-  \caption{gain目盛り10 回帰モデル出力波形周波数スペクトル}
-  \label{fig:two}
- \end{minipage}
-\end{figure}
-
 \begin{figure}[htbp]
  \begin{center}
   \includegraphics[width=150mm]{gain10_fft_hikaku.png}
@@ -295,6 +146,7 @@
  \label{fig:one}
 \end{figure}
 
+\clearpage
 \section{卒業論文のフォーマット}%
 \begin{description}
 \item[用紙サイズ] A4縦置きで横書き
