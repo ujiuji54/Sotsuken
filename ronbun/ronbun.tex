@@ -11,10 +11,6 @@
 \abstract{
 　論文には，表示に続いて論文要旨を記載する。論文要旨は，結果を含めて論文の内容が理解できるように簡潔にまとめられなければならない。論文の構成は，電子工学実験実習で購入した「知的な科学・技術文章の書き方」のP.57に記載されている，分量の少ない場合の論文の場合を参考にすること。また，論文の記載に関しては，本説明を熟読の上，体裁を整えることはもちろんのこと，論文内容も十分に吟味すること。\\
 　完成した論文は，A4フラットファイルに下図に示すようにな表示および背表紙を付け，提出すること。
-\vspace{1cm}
-\begin{center}
-\includegraphics[width=12cm,keepaspectratio,clip]{title.eps}
-\end{center}
 }%
 
 \begin{document}%
@@ -28,9 +24,23 @@
 \chapter{楽器エフェクタのシミュレータ}
 
 \chapter{音響におけるニューラルネットワーク}
-\section{再帰的ニューラルネットワーク}
+今回の研究では、楽器エフェクタをニューラルネットワークの手法の1つを用いてシミュレートする。
+ここでは、Recurrent Neural Networkの基礎的事項を述べ、その発展的な手法であり、今回使用するLong Short-Term Memoryについて説明する。
 
-\section{長期依存ニューラルネットワーク}
+\section{再帰的ニューラルネットワーク(RNN: Recurrent Neural Network)}
+音声データは(x(1),...x(t),...x(T))というT個のデータが1つの入力データ群となる時系列データである。
+通常のニューラルネットワークでは，音声や文章，映像などの時系列データを扱うことはできないが，RNN を使うことで中間層が時間方向に展開され，時系列データにも対応できる．
+今回の研究では，RNN におけるユニットの入出力ゲートを拡張し，長期依存を学習可能にしたLSTM(Long Short Term Memory) を使用した．
+
+\begin{figure}[htbp]
+ \begin{center}
+  \includegraphics[width=100mm]{RNN.png}
+ \end{center}
+ \caption{RNN構造図}
+ \label{fig:one}
+\end{figure}
+
+\section{長期依存ニューラルネットワーク(LSTM: Long Short Term Memory)}
 
 \chapter{実験方法}
 \section{教師データ作成}
