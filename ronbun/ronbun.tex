@@ -44,7 +44,15 @@
 
 \chapter{実験方法}
 \section{教師データ作成}
-本実験ではギター用の歪みエフェクタの一種である，BOSS DS-1を使用した．
+教師データは，100 msの音声データ(waveファイル)を入力側と出力側をそれぞれ用意し，それら1対を1つのデータセットとして扱う．
+
+\subsection{入力側音声データ}
+入力側音声データには，ギターの原音を使用した．PCとオーディオインターフェースをUSBケーブル，オーディオインターフェースとギターをアナログオーディオケーブルで結線し，サンプリング周波数48000 Hz，量子分解能は16 bitに設定して録音を実施した．低音域から高音域まで無作為に演奏したデータを50秒分用意した．
+
+\subsection{出力側音声データ}
+出力側音声データには，用意した入力側音声データを，ギター用の歪みエフェクタの一種であるBOSS DS-1に通したものを使用する．
+オーディオインターフェースを介し，DS-1への入力とDS-1からの出力音声の録音を同時に行った．録音環境の機材構成図を図に示す．
+
 \begin{figure}[htbp]
  \begin{center}
   \includegraphics[width=120mm]{env.png}
@@ -53,7 +61,16 @@
  \label{fig:one}
 \end{figure}
 
+\begin{figure}[htbp]
+ \begin{center}
+  \includegraphics[width=20mm]{ds1.jpg}
+ \end{center}
+ \caption{BOSS DS-1}
+ \label{fig:one}
+\end{figure}
+
 \section{学習}
+ミニバッチ学習100ステップを1epochとし,学習を行った.
 
 \section{評価実験}
 \subsection{出力波形比較}
