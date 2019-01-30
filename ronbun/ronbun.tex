@@ -35,8 +35,14 @@
 そこで，当時の最新素子だった半導体を駆使したファズが開発され，小音量でも「ひずみ」の効果の再現が可能となった．その後，回路の改良や技術の発展により，オーバードライブやディストーションなど様々なひずみエフェクタが開発された．
 
 \section{エフェクトシミュレータ}
-アナログ回路で構成されているエフェクタを，デジタル処理で再現する製品が普及している．数値を連続的に処理していたアナログに対し，デジタルは離散的にデータを扱うため，データの扱いやすさや，劣化に強い保存，発生するノイズの少なさなど，多くのメリットが存在する．しかし，デジタルの弱点として，離散値の間の値が表現できないため，細かな表現の再現性が乏しくなる．そのため，入念に設計されたギター用ひずみエフェクタなどの非線形フィルター特性を，完璧に再現するレベルには長年到達されていなかった．
-しかし，近年、音響の分野でニューラルネットワークが成果をあげている．
+アナログ回路で構成されているエフェクタを，デジタル処理で再現する製品が普及している．数値を連続的に処理していたアナログに対し，デジタルは離散的にデータを扱うため，データの扱いやすさや，劣化に強い保存，発生するノイズの少なさなど，多くのメリットが存在する．しかし，デジタルの弱点として，離散値の間の値が表現できないため，細かな表現の再現性が乏しくなる．
+
+デジタル信号処理が主流になり，電子回路シミュレータやインパルス応答の畳み込み等の技術が登場し，それらが応用されたエフェクトシミュレータが多く開発された．しかし，入念に設計されたギター用ひずみエフェクタなどの非線形フィルター特性を，完璧に再現するレベルには到達されていなかった．
+
+近年、音響の分野でニューラルネットワークが成果が多くあげられており，非線形特性のより高精度な再現が可能になると期待が高まっている．
+
+\section{ニューラルネットワークを用いた非線形特性懐疑}
+ニューラルネットワークを用いた非線形特性のシミュレートは，実用化され始めている．
 
 \chapter{音響におけるニューラルネットワーク}
 今回の研究では，楽器エフェクタをニューラルネットワークの手法の1つを用いてシミュレートする．
@@ -108,17 +114,28 @@ DS-1は，DIST，TONE，LEVELの3つのつまみを持つ．つまみの分解�
 
 \subsection{モデル構築}
 時系列データである音声データを扱うため，LSTMを使用する．モデルの構成は，input units=64,hidden units=64,output units=1とした．
-
-LSTMは，入力データ長と同じ長さの出力が得られるが，今回作成したモデルでは，入力側音声データを110 ms入力し，出力の末尾10 msを最終出力として使う．推論の際には，入力側音声データを10 msずつずらしながらモデルを適用することで完全な出力を得る．
+Kerasのモデル可視化機能を使用し，作成したモデル構成図を，図4.5 に示す．
 
 \begin{figure}[htbp]
  \begin{center}
-  \includegraphics[width=100mm]{suiron.png}
+  \includegraphics[width=100mm]{model.png}
+ \end{center}
+ \caption{構築モデル構成図}
+ \label{fig:one}
+\end{figure}
+
+入力データはそれぞれ110 msで入力するため，与えられる点数は，48000 Hz $\times$ 110ms $=$ 5280sampleとなる．
+LSTMは，入力データ長と同じ長さの出力が得られるが，今回作成したモデルでは，出力された110 msの音声データの末尾10 msを最終出力として使う．推論の際には，入力側音声データを10 msずつずらしながらモデルを適用することで完全な出力を整形する．これにより，出力のすべてが100 msの依存情報を得られる．
+
+\begin{figure}[htbp]
+ \begin{center}
+  \includegraphics[width=140mm]{suiron.png}
  \end{center}
  \caption{推論イメージ図}
  \label{fig:one}
 \end{figure}
 
+\newpage
 \subsection{学習}
 ライブラリはTensorflowをバックエンドとしたKerasを使用し，Googleが提供するブラウザ開発環境 Google Colaboratoryにて学習を実行した．
 16サンプルを1ステップ，100ステップを1epochとし，100epochの計算を行った.
@@ -140,7 +157,7 @@ LSTMは，入力データ長と同じ長さの出力が得られるが，今回�
 本章では，第4章の実験によって得られた結果について述べる．
 
 \section{学習結果}
-用意したDIST1,5,9の3パターンの教師データ，モデルを使用し，100Epochsの計算を行った．Epochsと損失の関係を図，表に示す．
+用意したDIST1,5,9の3パターンの教師データ，モデルを使用し，100Epochsの計算を行った．計算にはGoogle ColaboratoryのGPUを使用し，100 Epochsの所要時間はおよそ2時間だった．学習の際に算出された，教師データの損失とテストデータの損失，Epochsの関係を図5.1, 5.2, 5.3，表5.1, 5.2, 5.3 に示す．
 \begin{figure}[htbp]
  \begin{center}
   \includegraphics[width=100mm]{gain1_loss_hikaku.png}
@@ -601,27 +618,57 @@ Step&Train Data Loss&Validation Data Loss \\ \hline
 推論で得た出力と教師データにフーリエ変換処理を行い，比較した．窓関数は矩形窓を使用した。解析結果を図5.7,5.8,5.9に示す．
 
 \begin{figure}[htbp]
+ \begin{minipage}{0.5\hsize}
  \begin{center}
-  \includegraphics[width=100mm]{gain1_fft_hikaku.png}
+  \includegraphics[width=90mm]{gain1_fft_hikaku.png}
  \end{center}
- \caption{DIST:1 教師データ，回帰モデル出力波形周波数スペクトル比較}
+   \subcaption{音声1}
  \label{fig:one}
+ \end{minipage}
+ \begin{minipage}{0.5\hsize}
+ \begin{center}
+  \includegraphics[width=90mm]{gain1_fft_hikaku2.png}
+ \end{center}
+   \subcaption{音声2}
+ \label{fig:two}
+ \end{minipage}
+ \caption{DIST:1 教師データ，モデル出力周波数スペクトル比較}
 \end{figure}
 
 \begin{figure}[htbp]
+ \begin{minipage}{0.5\hsize}
  \begin{center}
-  \includegraphics[width=100mm]{gain5_fft_hikaku.png}
+  \includegraphics[width=90mm]{gain5_fft_hikaku.png}
  \end{center}
- \caption{DIST:5 教師データ，回帰モデル出力波形周波数スペクトル比較}
+   \subcaption{音声1}
  \label{fig:one}
+ \end{minipage}
+ \begin{minipage}{0.5\hsize}
+ \begin{center}
+  \includegraphics[width=90mm]{gain5_fft_hikaku2.png}
+ \end{center}
+   \subcaption{音声2}
+ \label{fig:two}
+ \end{minipage}
+ \caption{DIST:5 教師データ，モデル出力周波数スペクトル比較}
 \end{figure}
 
 \begin{figure}[htbp]
+ \begin{minipage}{0.5\hsize}
  \begin{center}
-  \includegraphics[width=100mm]{gain10_fft_hikaku.png}
+  \includegraphics[width=90mm]{gain10_fft_hikaku.png}
  \end{center}
- \caption{DIST:9 教師データ，回帰モデル出力波形周波数スペクトル比較}
+   \subcaption{音声1}
  \label{fig:one}
+ \end{minipage}
+ \begin{minipage}{0.5\hsize}
+ \begin{center}
+  \includegraphics[width=90mm]{gain10_fft_hikaku2.png}
+ \end{center}
+   \subcaption{音声1}
+ \label{fig:two}
+ \end{minipage}
+ \caption{DIST:10 教師データ，モデル出力周波数スペクトル比較}
 \end{figure}
 
 \chapter{考察}
