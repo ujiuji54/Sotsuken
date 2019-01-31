@@ -13,13 +13,13 @@ if __name__ == '__main__':
     wav, fs = sf.read(filename)
     totaltime = len(wav)/fs
     time = np.arange(0, totaltime, 1/fs)
-    plt.plot(time,wav, label="Real")
+    plt.plot(time,wav, label="Teacher")
 
     filename = sys.argv[2]
     wav, fs = sf.read(filename)
     totaltime = len(wav)/fs
     time = np.arange(0, totaltime, 1/fs)
-    plt.plot(time,wav, label="NN")
+    plt.plot(time,wav, label="Model")
 
     plt.xlabel("Times [s]")
     plt.ylabel("Amplitude [arb. unit]")

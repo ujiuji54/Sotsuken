@@ -5,14 +5,14 @@
 %\usepackage{times}
 
 \title{LSTMを用いた楽器エフェクタのシミュレータ構築}	% 卒業論文のタイトル
-\author{氏本 大智}			% 報告者
+\author{氏本 大智}		% 報告者
 \adviser{長谷 芳樹}			% 指導教官
 \year{30}					% 年度
 
 \abstract{
 　現在，音響機器がディジタルでシミュレートされ，ソフトウェアとして実現される場面が多くなっている．しかし，シミュレートには専用のハードが必要になるケースが多く，ソフトウェア単体で動作するシステムは未だ実用化されていない．\\
-　本研究では，PC のみで動作し，スウィープ音を入れるだけで音響フィルタを手軽にシミュレートできる，ディープラーニングを用いた音響フィルタのシミュレータ開発の検討を行った．\\
-　本研究では，ギターの原音データとひずみエフェクタを通した音声データを用意し，ニューラルネットワークを用いたシミュレータを作成した．その後，作成したシミュレータから得られた出力と教師データ出力の波形の比較，FFT処理を加え，得られた周波数スペクトルの比較を行った．その結果，出力波形は似かよったものが得られたが，周波数スペクトルをみると，6000Hzから精度が落ちることがわかった．\\
+　本研究では，PC のみで動作し，エフェクタへの入出力音を入れるだけで音響フィルタを手軽にシミュレートできる，ニューラルネットワークを用いた音響フィルタのシミュレータ開発の検討を行った．\\
+　ギターの原音データとひずみエフェクタを通した音声データを用意し，ニューラルネットワークを用いたシミュレータを作成した．その後，作成したシミュレータから得られた出力と教師データ出力の波形の比較，FFT処理を加え，得られた周波数スペクトルの比較を行った．その結果，出力波形は似かよったものが得られたが，周波数スペクトルをみると，6000Hzから精度が落ちることがわかった．\\
 　今後，人間の耳による聴取実験を行い，シミュレータの評価を確立したのちに，教師データの選定や，ハイパーパラメータの最適化などの検討が必要である．
 }%
 
@@ -23,9 +23,9 @@
 
 \chapter{はじめに}
 \pagenumbering{arabic}
-現在，音響機器がディジタルでシミュレートされ，ソフトウェアとして実現される場面が多くなっている．しかし，シミュレートには専用のハードが必要になるケースが多く，ソフトウェア単体で動作するシステムは未だ実用化されていない．
+現在，音響機器がディジタルでシミュレートされ，ソフトウェアとして実現される場面が多くなっている．音響特性のシミュレート技術も進歩し、数々のシミュレータが開発され，それらは高い再現度を実現している．しかし，シミュレートには専用のハードが必要になるケースが多く，ソフトウェア単体で動作するシステムは未だ実用化されていない．
 
-本研究では，PC のみで動作し，スウィープ音を入れるだけで音響フィルタを手軽にシミュレートできる，ディープラーニングを用いた音響フィルタのシミュレータの構築を目的としている．
+本研究では，PCとオーディオインターフェース等の録音機器のみで動作し，エフェクタへの入出力音を入れるだけで音響フィルタを手軽にシミュレートできる，ニューラルネットワークを用いた音響フィルタのシミュレータの構築を目的としている．
 
 \chapter{楽器エフェクタ}
 音響の分野におけるエフェクタとは，音響効果を与える目的で使用される機器のことを指す．
@@ -35,23 +35,37 @@
 そこで，当時の最新素子だった半導体を駆使したファズが開発され，小音量でも「ひずみ」の効果の再現が可能となった．その後，回路の改良や技術の発展により，オーバードライブやディストーションなど様々なひずみエフェクタが開発された．
 
 \section{エフェクトシミュレータ}
-アナログ回路で構成されているエフェクタを，デジタル処理で再現する製品が普及している．数値を連続的に処理していたアナログに対し，デジタルは離散的にデータを扱うため，データの扱いやすさや，劣化に強い保存，発生するノイズの少なさなど，多くのメリットが存在する．しかし，デジタルの弱点として，離散値の間の値が表現できないため，細かな表現の再現性が乏しくなる．
+数値を連続的に処理していたアナログに対し，デジタルは離散的にデータを扱うため，データの扱いやすさや，劣化に強い保存，発生するノイズの少なさなど，多くのメリットが存在する．
+それらの利点から，デジタル信号処理が主流になり，アナログ信号処理を行うシステムはデジタル信号処理のものに置き換えられていった．音響の分野でも，アナログからデジタルへの移り変わりは進み，アナログ回路で構成されているエフェクタを，デジタル処理で再現する製品が多く普及している．エフェクタのシミュレートには，電子回路シミュレータやインパルス応答の畳み込み等の技術が応用され，再現度の高いエフェクトシミュレータが数多く開発されている．
 
-デジタル信号処理が主流になり，電子回路シミュレータやインパルス応答の畳み込み等の技術が登場し，それらが応用されたエフェクトシミュレータが多く開発された．しかし，入念に設計されたギター用ひずみエフェクタなどの非線形フィルター特性を，完璧に再現するレベルには到達されていなかった．
+\section{インパルス応答を用いたシミュレート}
+インパルス応答の畳み込みによるシミュレートは，エフェクタのシミュレータによく使われている手法の一つである。インパルスと呼ばれる非常に短い信号を，シミュレートする対象のシステムに入力し，その応答を用いて畳み込みを行うことでシステムの特性を再現できる．
 
-近年、音響の分野でニューラルネットワークが成果が多くあげられており，非線形特性のより高精度な再現が可能になると期待が高まっている．
+インパルス応答畳み込みの手法が使用されている製品の例として，Two notesのTorpidoを示す。
+この製品は，スピーカーキャビネットのインパルス応答を利用して畳み込みを行い，その特性を再現している．
+
+\begin{figure}[htbp]
+ \begin{center}
+  \includegraphics[width=50mm]{torpido.png}
+ \end{center}
+ \caption{Two notes torpido}
+ \label{fig:one}
+\end{figure}
+
+インパルス応答の畳み込みによるシミュレートは高い再現度に加えて，インパルス応答の音声データさえ用意できれば，誰でもシミュレートができる手軽さが利点である．しかし，ギター用ひずみエフェクタなどの非線形特性を模倣することは不可能である．
 
 \section{ニューラルネットワークを用いた非線形特性懐疑}
-ニューラルネットワークを用いた非線形特性のシミュレートは，実用化され始めている．
+近年、音響の分野でニューラルネットワークが成果が多くあげられており，非線形特性のより高精度な再現が可能になると期待が高まっている．
 
 \chapter{音響におけるニューラルネットワーク}
 今回の研究では，楽器エフェクタをニューラルネットワークの手法の1つを用いてシミュレートする．
 ここでは，Recurrent Neural Networkの基礎的事項を述べ，その発展的な手法であり，今回使用するLong Short-Term Memoryについて説明する．
 
-\section{再帰的ニューラルネットワーク(RNN: Recurrent Neural Network)}
+\section{リカレントニューラルネットワーク(RNN: Recurrent Neural Network)}
 音声データは(x(1),...x(t),...x(T))というT個のデータが1つの入力データ群となる時系列データである．
-通常のニューラルネットワークでは，音声や文章，映像などの時系列データを扱うことはできないが，RNN を使うことで中間層が時間方向に展開され，時系列データにも対応できる．
-今回の研究では，RNN におけるユニットの入出力ゲートを拡張し，長期依存を学習可能にしたLSTM(Long Short Term Memory) を使用した．
+時間の概念をニューラルネットワークに取り入れるには，過去の状態をモデル内で保持する必要がある．
+RNNは，出力を次のステップに入力として渡すことにより，過去の状態が保持され連続的な情報を利用できる．
+RNNの構造図を図3.1 に示す．
 
 \begin{figure}[htbp]
  \begin{center}
@@ -61,13 +75,42 @@
  \label{fig:one}
 \end{figure}
 
+通常のニューラルネットワークでは，音声や文章，映像などの時系列データを扱うことはできないが，RNN を使うことで中間層が時間方向に展開され，時系列データにも対応できる．
+
 \section{長期依存ニューラルネットワーク(LSTM: Long Short Term Memory)}
+RNNは，長期の時間依存性は勾配が消失してしまうことから学習できない．この問題を解決すべく考案されたのがLSTMである．
+\newpage
+
+\begin{figure}[htbp]
+ \begin{center}
+  \includegraphics[width=120mm]{LSTM.png}
+ \end{center}
+ \caption{LSTM構造図}
+ \label{fig:one}
+\end{figure}
+
+LSTMは，図3.2 のように，通常のニューロンに対し，入力ゲート，出力ゲート，忘却ゲートを追加したユニットを使用する．入出力ゲートを拡張し，フィードバック機構をつけることで勾配の消失を解消し，長期の学習が可能となる．
 
 \chapter{実験方法}
 本章では，LSTMを用いた楽器エフェクタのシミュレータの構築手順，シミュレータの評価方法について記述する．
 
+\section{使用機材}
+本実験で使用した機材を表4.1 に示す。
+\begin{table}[h]
+  \begin{center}
+  \caption{使用機材}
+  \begin{tabular}{c|cc} \hline
+使用機材およびソフト&メーカー，ソフト名&型番 \\ \hline
+    オーディオインターフェース&steinberg&UR22 \\
+    楽器エフェクター&BOSS&DS-1\\
+    音声再生，録音ソフト&Audacity& \\
+    学習環境&Google Colaboratory& \\ \hline
+  \end{tabular}
+ \end{center}
+\end{table}
+
 \section{教師データ作成}
-教師データは，110 msの音声データ(waveファイル)を入力側と出力側をそれぞれ用意し，それら1対を1つのデータセットとして扱った．音声データは-1.0～1.0へ正規化し、1次元ベクトルとして扱う．
+学習に使用する教師データを作成した．教師データは，110 msの音声データ(waveファイル)を入力側と出力側をそれぞれ用意し，それら1対を1つのデータセットとして扱った．音声データは-1.0～1.0へ正規化し、1次元ベクトルとして扱う．
 \begin{figure}[htbp]
  \begin{minipage}{0.5\hsize}
  \begin{center}
@@ -135,7 +178,6 @@ LSTMは，入力データ長と同じ長さの出力が得られるが，今回�
  \label{fig:one}
 \end{figure}
 
-\newpage
 \subsection{学習}
 ライブラリはTensorflowをバックエンドとしたKerasを使用し，Googleが提供するブラウザ開発環境 Google Colaboratoryにて学習を実行した．
 16サンプルを1ステップ，100ステップを1epochとし，100epochの計算を行った.
@@ -160,9 +202,25 @@ LSTMは，入力データ長と同じ長さの出力が得られるが，今回�
 用意したDIST1,5,9の3パターンの教師データ，モデルを使用し，100Epochsの計算を行った．計算にはGoogle ColaboratoryのGPUを使用し，100 Epochsの所要時間はおよそ2時間だった．学習の際に算出された，教師データの損失とテストデータの損失，Epochsの関係を図5.1, 5.2, 5.3，表5.1, 5.2, 5.3 に示す．
 \begin{figure}[htbp]
  \begin{center}
-  \includegraphics[width=100mm]{gain1_loss_hikaku.png}
+  \includegraphics[width=80mm]{gain1_loss_hikaku.png}
  \end{center}
  \caption{DIST:1　教師データ，テストデータの損失比較}
+ \label{fig:one}
+\end{figure}
+
+\begin{figure}[htbp]
+ \begin{center}
+  \includegraphics[width=80mm]{gain5_loss_hikaku.png}
+ \end{center}
+ \caption{DIST:5　教師データ，テストデータの損失比較}
+ \label{fig:one}
+\end{figure}
+
+\begin{figure}[htbp]
+ \begin{center}
+  \includegraphics[width=80mm]{gain10_loss_hikaku.png}
+ \end{center}
+ \caption{DIST:9 教師データ，テストデータの損失比較}
  \label{fig:one}
 \end{figure}
 
@@ -275,14 +333,6 @@ Step&Train Data Loss&Validation Data Loss \\ \hline
   \end{center}
 \end{table}
 
-\begin{figure}[htbp]
- \begin{center}
-  \includegraphics[width=100mm]{gain5_loss_hikaku.png}
- \end{center}
- \caption{DIST:5　教師データ，テストデータの損失比較}
- \label{fig:one}
-\end{figure}
-
 \begin{table}
   \begin{center}
   \caption{DIST:5　損失}
@@ -391,14 +441,6 @@ Step&Train Data Loss&Validation Data Loss \\ \hline
   \end{tabular}
   \end{center}
 \end{table}
-
-\begin{figure}[htbp]
- \begin{center}
-  \includegraphics[width=100mm]{gain10_loss_hikaku.png}
- \end{center}
- \caption{DIST:9 教師データ，テストデータの損失比較}
- \label{fig:one}
-\end{figure}
 
 \begin{table}
   \begin{center}
@@ -509,11 +551,10 @@ Step&Train Data Loss&Validation Data Loss \\ \hline
   \end{center}
 \end{table}
 
-\clearpage
-
 \section{出力波形}
-に示す結果から，最もvalidationlossが低くなったEpochsのモデルを用いて，推論し，教師データとの比較を行った．推論の際，入力データは学習に使用していないものを使用した．
-出力結果を図5.4,5.5,5,6に示す。比較のため，0～0.02 sを拡大表示した．
+実験5.1 の結果から，最もvalidationlossが低くなったEpochsのモデルを用いて，推論し，教師データとの比較を行った．推論の際，入力データは学習に使用していない音源を使用した．
+5秒間演奏した音源を2つ用意し，それぞれ0.00～0.02 s,2.00～2.02,4.00～4.02の3箇所を拡大し，教師データとモデルの出力を比較した．
+出力波形を図5.4,5.5,5,6に示す。
 
 %DIST1
 \begin{figure}[htbp]
@@ -521,27 +562,42 @@ Step&Train Data Loss&Validation Data Loss \\ \hline
  \begin{center}
   \includegraphics[width=90mm]{gain1_output_hikaku.png}
  \end{center}
+ \subcaption{音源1　0.00～0.02 s}
  \label{fig:one}
  \end{minipage}
  \begin{minipage}{0.5\hsize}
  \begin{center}
   \includegraphics[width=90mm]{gain1_output_hikaku2.png}
  \end{center}
+ \subcaption{音源1　2.00～2.02 s}
  \label{fig:two}
  \end{minipage}
-\end{figure}
-
-\begin{figure}[htbp]
  \begin{minipage}{0.5\hsize}
  \begin{center}
   \includegraphics[width=90mm]{gain1_output_hikaku3.png}
  \end{center}
+ \subcaption{音源1　4.00～4.02 s}
  \label{fig:one}
  \end{minipage}
  \begin{minipage}{0.5\hsize}
  \begin{center}
   \includegraphics[width=90mm]{gain1_output_hikaku4.png}
  \end{center}
+ \subcaption{音源2　0.00～0.02 s}
+ \label{fig:two}
+ \end{minipage}
+ \begin{minipage}{0.5\hsize}
+ \begin{center}
+  \includegraphics[width=90mm]{gain1_output_hikaku5.png}
+ \end{center}
+ \subcaption{音源2　2.00～2.02 s}
+ \label{fig:one}
+ \end{minipage}
+ \begin{minipage}{0.5\hsize}
+ \begin{center}
+  \includegraphics[width=90mm]{gain1_output_hikaku6.png}
+ \end{center}
+ \subcaption{音源2　4.00～4.02 s}
  \label{fig:two}
  \end{minipage}
  \caption{DIST:1　波形拡大比較}
@@ -553,30 +609,45 @@ Step&Train Data Loss&Validation Data Loss \\ \hline
  \begin{center}
   \includegraphics[width=90mm]{gain5_output_hikaku.png}
  \end{center}
+ \subcaption{音源1　0.00～0.02 s}
  \label{fig:one}
  \end{minipage}
  \begin{minipage}{0.5\hsize}
  \begin{center}
   \includegraphics[width=90mm]{gain5_output_hikaku2.png}
  \end{center}
+ \subcaption{音源1　2.00～2.02 s}
  \label{fig:two}
  \end{minipage}
-\end{figure}
-
-\begin{figure}[htbp]
  \begin{minipage}{0.5\hsize}
  \begin{center}
   \includegraphics[width=90mm]{gain5_output_hikaku3.png}
  \end{center}
+ \subcaption{音源1　4.00～4.02 s}
  \label{fig:one}
  \end{minipage}
  \begin{minipage}{0.5\hsize}
  \begin{center}
   \includegraphics[width=90mm]{gain5_output_hikaku4.png}
  \end{center}
+ \subcaption{音源2　0.00～0.02 s}
  \label{fig:two}
  \end{minipage}
- \caption{dist:5　波形拡大比較}
+ \begin{minipage}{0.5\hsize}
+ \begin{center}
+  \includegraphics[width=90mm]{gain5_output_hikaku5.png}
+ \end{center}
+ \subcaption{音源2　2.00～2.02 s}
+ \label{fig:one}
+ \end{minipage}
+ \begin{minipage}{0.5\hsize}
+ \begin{center}
+  \includegraphics[width=90mm]{gain5_output_hikaku6.png}
+ \end{center}
+ \subcaption{音源2　4.00～4.02 s}
+ \label{fig:two}
+ \end{minipage}
+ \caption{DIST:5　波形拡大比較}
 \end{figure}
 
 \newpage
@@ -586,27 +657,42 @@ Step&Train Data Loss&Validation Data Loss \\ \hline
  \begin{center}
   \includegraphics[width=90mm]{gain10_output_hikaku.png}
  \end{center}
+ \subcaption{音源1　0.00～0.02 s}
  \label{fig:one}
  \end{minipage}
  \begin{minipage}{0.5\hsize}
  \begin{center}
   \includegraphics[width=90mm]{gain10_output_hikaku2.png}
  \end{center}
+ \subcaption{音源1　2.00～2.02 s}
  \label{fig:two}
  \end{minipage}
-\end{figure}
-
-\begin{figure}[htbp]
  \begin{minipage}{0.5\hsize}
  \begin{center}
   \includegraphics[width=90mm]{gain10_output_hikaku3.png}
  \end{center}
+ \subcaption{音源1　4.00～4.02 s}
  \label{fig:one}
  \end{minipage}
  \begin{minipage}{0.5\hsize}
  \begin{center}
   \includegraphics[width=90mm]{gain10_output_hikaku4.png}
  \end{center}
+ \subcaption{音源2　0.00～0.02 s}
+ \label{fig:two}
+ \end{minipage}
+ \begin{minipage}{0.5\hsize}
+ \begin{center}
+  \includegraphics[width=90mm]{gain10_output_hikaku5.png}
+ \end{center}
+ \subcaption{音源2　2.00～2.02 s}
+ \label{fig:one}
+ \end{minipage}
+ \begin{minipage}{0.5\hsize}
+ \begin{center}
+  \includegraphics[width=90mm]{gain10_output_hikaku6.png}
+ \end{center}
+ \subcaption{音源2　4.00～4.02 s}
  \label{fig:two}
  \end{minipage}
  \caption{DIST:10　波形拡大比較}
@@ -615,7 +701,7 @@ Step&Train Data Loss&Validation Data Loss \\ \hline
 \clearpage
 
 \section{スペクトル分析}
-推論で得た出力と教師データにフーリエ変換処理を行い，比較した．窓関数は矩形窓を使用した。解析結果を図5.7,5.8,5.9に示す．
+実験5.2で使用した音源をモデルに入力したときの出力と教師データにフーリエ変換処理を行い，比較した．窓関数は矩形窓を使用した。解析結果を図5.7,5.8,5.9に示す．
 
 \begin{figure}[htbp]
  \begin{minipage}{0.5\hsize}
@@ -672,7 +758,7 @@ Step&Train Data Loss&Validation Data Loss \\ \hline
 \end{figure}
 
 \chapter{考察}
-本研究では、ニューラルネットワークを用いることで、PC のみで動作し，シミュレートする対象となるエフェクタの入出力音を入れるだけで、音響フィルタを手軽にシミュレートできる，シミュレータ開発の検討を行った．
+本研究では、ニューラルネットワークを用いることでPC のみで動作し，シミュレートする対象となるエフェクタの入出力音を入れるだけで、音響フィルタを手軽にシミュレートできるシミュレータ開発の検討を行った．
 DS-1のDISTのつまみを変えた3パターンの教師データを学習させた結果、図5.1,5.2,5.3より、どのパターンも約20 epochsで損失が収束したことがわかる。損失の値が小さいほど回帰モデルが出力する値は真に近くなり，高い精度の実現を示す．
 
 次に、エフェクタ実機から出力された音声と、学習させたニューラルネットワークから出力された音声を比較し、類似度を求め、評価を行った。
@@ -682,5 +768,9 @@ DS-1のDISTのつまみを変えた3パターンの教師データを学習さ�
 \chapter*{謝辞}
 
 \chapter*{参考文献}
+\begin{enumerate}
+  \item 日本エレクトロ・ハーモニックス株式会社ホームページ，http://www.electroharmonix.co.jp/twonotes/index.html
+  \item 巣籠悠輔: "詳解ディープラーニング"，マイナビ出版, pp.209-250 (2017).
+\end{enumerate}
 
 \end{document}
