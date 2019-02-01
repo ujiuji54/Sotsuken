@@ -1,0 +1,99 @@
+% 
+% 電子工学科卒研発表会予稿スタイルファイル
+%            平成16年1月29日作成
+%
+%%%%  Set Size   %%%%
+\setlength\paperheight {297mm}
+\setlength\paperwidth  {210mm}
+\setlength\oddsidemargin{-3mm}
+\setlength\evensidemargin{-3mm}
+\setlength\textwidth{165mm}
+\setlength\topmargin{-7mm}
+\setlength\headheight{5mm}
+\setlength\headsep{7mm}
+\setlength\textheight{250mm}
+\setlength{\columnsep}{3zw}
+
+\sloppy
+
+\def\title#1{\gdef\@title{#1}}%
+\def\author#1{\gdef\@author{#1}}%
+\def\adviser#1{\gdef\@adviser{#1}}%
+\def\year#1{\gdef\@year{#1}}%
+\def\num#1{\gdef\@num{#1}}%
+\def\kind#1{\gdef\@kind{#1}}%
+
+
+%%%% Head %%%%%
+%\def\ps@myheading{%
+%   \let\@mkboth=\@gobbletwo
+%   \def\@evenfoot{}%
+%   \def\@oddfoot{}%
+%   \def\@evenhead{}%
+%   \def\@oddhead{
+%    \underline{\hbox to \textwidth %
+%    {平成{\@year}年度　卒業研究{\@kind}発表会 \hfill 神戸高専電子工学科　No.{\@num}}}%
+%}%
+%}%
+
+%\pagestyle{myheading}
+
+%%%% Title Page %%%%
+
+\def\maketitle{%
+	\twocolumn[
+	\begin{center}%
+		\Large\bfseries\@title
+	\end{center}
+	\begin{center}%
+		{\large
+		\begin{tabular}[t]{ll}%
+        		\@author & 　　指導教官 \@adviser \\
+		\end{tabular}}%
+	\end{center}
+	\vskip 1.5em]}
+
+%%% Caption %%%%%
+\long\def\@makecaption#1#2{%
+  \advance\leftskip1cm
+  \advance\rightskip1cm
+  \vskip\abovecaptionskip
+  \iftdir\sbox\@tempboxa{#1\hskip1zw#2}%
+    \else\sbox\@tempboxa{#1 #2}%
+  \fi
+  \ifdim \wd\@tempboxa >\hsize
+    \iftdir #1\hskip1zw#2\relax\par
+      \else #1 #2\relax\par\fi
+  \else
+    \global \@minipagefalse
+    \hbox to\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+  \vskip\belowcaptionskip}
+
+%%% \Hline, \Vline %%%
+\makeatletter
+\def\@arrayrule{\@addtopreamble{%
+\vrule \@width \arrayrulewidth}}
+\def\Hline{\noalign{\hrule height 1.2pt}}
+\def\Vline{\vrule width 1.2pt}
+\def\nline{\noalign{\hrule height 0.2pt}}
+\makeatother
+
+%%% enumerate %%%
+\def\labelenumi{\arabic{enumi})}%
+
+%%% Section
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{\z@}%
+   {1.0\Cvs \@plus.3\Cdp \@minus.2\Cdp}%
+   {.1\Cvs \@plus.1\Cdp}%
+   {\reset@font\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}%
+   {1.0\Cvs \@plus.3\Cdp \@minus.2\Cdp}%
+   {.1\Cvs \@plus.1\Cdp}%
+   {\reset@font\normalsize\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{\z@}%
+   {1.0\Cvs \@plus.3\Cdp \@minus.2\Cdp}%
+   {.1\Cvs \@plus.1\Cdp}%
+   {\reset@font\normalsize\bfseries}}
+\makeatother
